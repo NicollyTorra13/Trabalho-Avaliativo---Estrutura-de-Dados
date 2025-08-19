@@ -1,4 +1,4 @@
-from collections import deque
+from collections import deque 
 from dataclasses import dataclass
 import time
 from typing import Dict, Deque, List, Optional
@@ -33,6 +33,7 @@ class Venda:
     valor: float
     produto_nome: str
     cliente_nome: str
+
 
 class Estoque:
     def __init__(self):
@@ -90,6 +91,15 @@ class Estoque:
         print("\n--- Lista de Produtos ---")
         for p in self.produtos.values():
             print(p)
+        self.aguardar()
+
+    def buscar_produto_por_id(self, id_produto: int):
+        produto = self._obter_produto(id_produto)
+        if produto:
+            print("\n--- Produto Encontrado ---")
+            print(produto)
+        else:
+            print(f"Nenhum produto encontrado com o ID {id_produto}.")
         self.aguardar()
 
     def cadastrar_cliente(self, nome: str):
@@ -174,7 +184,6 @@ class Estoque:
         self.aguardar()
 
     def atender_proxima_venda(self):
-        """Simula o atendimento/retirada da fila (p. ex. faturamento/entrega)."""
         if not self.fila_vendas:
             self.aguardar("Não há vendas na fila.")
             return
@@ -237,6 +246,7 @@ class Estoque:
             print(c)
         self.aguardar()
 
+
 def menu():
     estoque = Estoque()
 
@@ -253,7 +263,8 @@ def menu():
         print("9  - Exibir valor total do estoque")
         print("10 - Exibir valor total de vendas realizadas")
         print("11 - Exibir clientes e valores gastos")
-        print("12 - Sair")
+        print("12 - Buscar produto por ID")  # <<< NOVA OPÇÃO
+        print("13 - Sair")
 
         escolha = input("Escolha: ").strip()
 
@@ -299,6 +310,10 @@ def menu():
                 estoque.exibir_clientes_valores()
 
             elif escolha == "12":
+                id_prod = int(input("Digite o ID do produto: "))
+                estoque.buscar_produto_por_id(id_prod)
+
+            elif escolha == "13":
                 print("Saindo do sistema... Até logo!")
                 break
 
