@@ -2,6 +2,7 @@ from collections import deque
 from dataclasses import dataclass
 import time
 from typing import Dict, Deque, List, Optional
+import os
 
 @dataclass
 class Produto:
@@ -46,6 +47,7 @@ class Estoque:
         self._prox_id_cliente = 1
         self._prox_id_venda = 1
         self._espera_segundos = 5
+        self.arquivo = "estoque.txt"
 
     def aguardar(self, msg: Optional[str] = None, segundos: Optional[int] = None):
         if msg:
@@ -53,6 +55,30 @@ class Estoque:
         s = self._espera_segundos if segundos is None else segundos
         print(f"(aguardando {s} segundos...)")
         time.sleep(s)
+    
+    def salvar_em_arquivo(self):
+        with open(self.arquivo, "w", encoding="utf-8") as f:
+            f.write("==== PRODUTOS ====\n")
+            for p in self.produtos.values():
+                f.write(str(p) + "\n")
+
+            f.write("\n==== CLIENTES ====\n")
+            for c in self.clientes.values():
+                f.write(str(c) + "\n")
+
+            f.write("\n==== VENDAS ====\n")
+            for v in self.pilha_operacoes:
+                f.write(
+                    f"Venda {v.id} | Produto: {v.produto_nome} (ID {v.produto_id}) | "
+                    f"Cliente: {v.cliente_nome} (ID {v.cliente_id}) | "
+                    f"Qtd: {v.quantidade} | Valor: R${v.valor:.2f}\n"
+                )
+
+            total_estoque = self._calc_valor_total_estoque()
+            f.write(f"\nValor total do estoque: R${total_estoque:.2f}\n")
+            f.write(f"Valor total de vendas: R${self.valor_total_vendas:.2f}\n")
+
+        self.aguardar(f"Arquivo '{self.arquivo}' gerado/atualizado com sucesso!")
 
     def _obter_produto(self, id_produto: int) -> Optional[Produto]:
         return self.produtos.get(id_produto)
@@ -252,6 +278,7 @@ def menu():
 
     while True:
         print("\n===== MENU ESTOQUE =====")
+        print("0  - Gerar arquivo TXT") 
         print("1  - Cadastrar cliente")
         print("2  - Listar clientes")
         print("3  - Cadastrar produto")
@@ -263,13 +290,16 @@ def menu():
         print("9  - Exibir valor total do estoque")
         print("10 - Exibir valor total de vendas realizadas")
         print("11 - Exibir clientes e valores gastos")
-        print("12 - Buscar produto por ID")  # <<< NOVA OPÇÃO
+        print("12 - Buscar produto por ID")  
         print("13 - Sair")
 
         escolha = input("Escolha: ").strip()
 
         try:
-            if escolha == "1":
+            if escolha == "0":
+                estoque.salvar_em_arquivo()
+
+            elif escolha == "1":
                 nome = input("Digite o nome do cliente: ")
                 estoque.cadastrar_cliente(nome)
 
